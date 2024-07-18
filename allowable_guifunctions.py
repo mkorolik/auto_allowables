@@ -8,12 +8,15 @@ from tkinter import filedialog
 
     
 
-def get_all_allows():
+def get_alls():
 # print all allowables for currently selected property; works for both sorted and unsorted
     try:
-        data_select.get_allowable(chosen_quantity.get(), all_types=True)
+        return [data_select.get_allowable(chosen_quantity.get(), all_types=True), data_select.get_ps(chosen_quantity.get()), 
+                np.mean(data_select.df[chosen_quantity.get()]), np.std(data_select.df[chosen_quantity.get()])]
     except: 
-        dataset.get_allowable(chosen_quantity.get(), all_types=True)
+        return [dataset.get_allowable(chosen_quantity.get(), all_types=True), dataset.get_ps(chosen_quantity.get()),
+                np.mean(dataset.df[chosen_quantity.get()]), np.std(dataset.df[chosen_quantity.get()])]
+
     
 
 
@@ -37,8 +40,16 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
     else:
         canvas.get_tk_widget().grid(column=c, row=r)
 
-    allowables_text = 'allowable numbers will go here :)'
-    Label(frame_text, text=allowables_text).grid()
+    allowables, ps, mean, stdev = get_alls()
+    allowable_norm, allowable_weib, allowable_gamma = allowables
+    p_norm, p_weib, p_gamma = ps
+    
+
+    Label(frame_text, text=f'Mean: {mean:.2f}; StDev: {stdev:.2f}').grid()
+    Label(frame_text, text=f'Normal method: {allowable_norm:.3f}, p = {p_norm:.2f}').grid()
+    Label(frame_text, text=f'Weibull (ish) method: {allowable_weib:.3f}, p = {p_weib:.2f}').grid()
+    Label(frame_text, text=f'Gamma method: {allowable_gamma:.3f}, p = {p_gamma:.2f}').grid()
+
 
 
 def get_files(frame_browse, frame_selections, frame_plots, frame_text):
