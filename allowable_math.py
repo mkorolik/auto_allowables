@@ -45,7 +45,7 @@ def fit(data, type, ax=None, type_name=None, plot=True, plot_hist=True, hc='ligh
         ax = plt.gca()
 
     if plot_hist:
-            values,bins,hist = ax.hist(data, color=hc, edgecolor='black', density=True)
+        values,bins,hist = ax.hist(data, color=hc, edgecolor='black', density=True)
     else:
         values, bins = np.histogram(data, density=True)
 
@@ -135,9 +135,6 @@ class subset:
         except: print('No header "Reduction of area" found')
         try: self.temp = df['Test Temperature (°F)'] 
         except: print('No header "Test Temperature (°F)" found')
-
-    def sort_by_temp(self, temp):
-        return subset(self.df[self.temp==temp][self.df['MC'].notna()])
     
     def sort(self, sortby, sortvar):
         return subset(self.df[self.df[sortby]==sortvar][self.df['MC'].notna()])
@@ -151,13 +148,13 @@ class subset:
         
         return ps
 
-    def get_allowable(self, y, weib=False, all_types=None):
+    def get_allowable(self, y, weib=False, all_types=False):
         data = self.df[y]
 
         ps = []
 
-        for i in range(len(types)):
-            ps.append(fit(data, types[i], type_name=type_names[i], plot=False, plot_hist=False, lc=colors[i]))
+        for type in types:
+            ps.append(fit(data, type, plot=False, plot_hist=False))
 
         if not weib:
             ps[1] = 0
@@ -172,7 +169,7 @@ class subset:
         if best_type_name == 'Gamma':
             allowable = get_interval_gamma(data)
 
-        if all_types is not None:
+        if all_types is True:
             print(get_interval_normal(data), get_interval_weibull(data), get_interval_gamma(data))
             return [get_interval_normal(data), get_interval_weibull(data), get_interval_gamma(data)]
         else:
