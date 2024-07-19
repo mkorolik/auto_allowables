@@ -42,7 +42,7 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
     else:
         canvas.get_tk_widget().grid(column=c, row=r)
 
-    allowables, ps, mean, stdev = get_alls()
+    allowables, ps, mean, stdev = get_alls()    
     allowable_norm, allowable_weib, allowable_gamma = allowables
     p_norm, p_weib, p_gamma = ps
     
@@ -53,19 +53,20 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
     Label(frame_text, text=f'Gamma method: {allowable_gamma:.3f}, p = {p_gamma:.2f}').grid()
 
 
-def plot_temp(frame):
+def plot_temp(frame_plot, frame_drop):
     # fig, axs = plt.subplots()
     fig = Figure()
     axs = fig.add_subplot(111)
 
     q = chosen_quantity.get()
 
-    try:
-        data_select.plot_temperature(q, ax=axs)
-    except:
-        dataset.plot_temperature(q, ax=axs)
 
-    canvas2 = FigureCanvasTkAgg(fig, master=frame)
+    try:
+        data_select.plot_temperature(q, ax=axs, deg=degree.get())
+    except:
+        dataset.plot_temperature(q, ax=axs, deg=degree.get())
+
+    canvas2 = FigureCanvasTkAgg(fig, master=frame_plot)
     canvas2.draw()
 
     canvas2.get_tk_widget().grid()
@@ -95,10 +96,17 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
     drop = OptionMenu(frame_browse, chosen_quantity, *dataset.headers).grid()
 
 # temperature curve
-    button_temp = Button(frame_browse, text="Plot Temperature Curve", command = lambda: plot_temp(frame_text)).grid()
+    global degree
+    degree = IntVar()
+    degree.set("Degree")
+
+    button_temp = Button(frame_browse, text="Plot Temperature Curve", command = lambda: plot_temp(frame_plots, frame_browse))
+    button_temp.grid()
+
+    drop_t = OptionMenu(frame_browse, degree, *[1, 2, 3, 4]).grid(row=button_temp.grid_info()['row'], column=button_temp.grid_info()['column']+1)
 
 # creates button for initiating a new sort
-    button_sort = Button(frame_browse, text = "New Sort", command = lambda: select(frame_selections)).grid()
+    button_sort = Button(frame_selections, text = "New Sort", command = lambda: select(frame_selections)).grid()
 
 # sorting 
     def select(frame):
@@ -125,7 +133,7 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
             sort_var.trace_add("write", get_sort_var)
 
             # dropdown for options
-            drop_sv = OptionMenu(frame, sort_var, *list(set(dataset.df[sort_by.get()]))).grid()
+            drop_sv = OptionMenu(frame, sort_var, *list(set(dataset.df[sort_by.get()]))).grid(row=drop_s.grid_info()['row'], column=drop_s.grid_info()['column'] + 1)
 
     # begin sort
         sort_by = StringVar()
@@ -133,4 +141,5 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
         sort_by.trace_add("write", get_sort)
 
         # dropdown for quantities
-        drop_s = OptionMenu(frame, sort_by, *dataset.headers).grid()
+        drop_s = OptionMenu(frame, sort_by, *dataset.headers)
+        drop_s.grid()

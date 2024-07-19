@@ -106,23 +106,35 @@ def get_interval_weibull(data, p=0.99, conf=1-0.95):
 
 class subset:
     def __init__(self, df):
-       self.df = df 
-       
-       self.headers = self.df.columns.values
+        self.df = df 
+        self.headers = self.df.columns.values
 
-       self.id = df['Number']
-       self.w = df['Width (in)']
-       self.t = df['Thickness (in)']
-       self.yield_force = df['Force at Yield (lbf)']
-       self.yield_tensilestress = df['Tensile stress at Yield (Offset 0.2 %)']
-       self.max_force = df['Max Force']
-       self.maxforce_tensilestress = df['Tensile stress at Max Force']
-       self.maxforce_tensilestrain = df['Tensile strain at Max Force']
-       self.break_tensilestrain = df['Tensile strain at Break ']
-       self.modulus = df['Modulus ']
-       self.elongation = df['Elongation (%) Calipers']
-       self.area_reduction = df['Reduction of area']
-       self.temp = df['Test Temperature (°F)'] 
+        try: self.id = df['Number']
+        except: print('No header "Number" found')
+        try: self.w = df['Width (in)']
+        except: print('No header "Width (in)" found')
+        try: self.t = df['Thickness (in)']
+        except: print('No header "Thickness (in)" found')
+        try: self.yield_force = df['Force at Yield (lbf)']
+        except: print('No header "Force at Yield (lbf)" found')
+        try: self.yield_tensilestress = df['Tensile stress at Yield (Offset 0.2 %)']
+        except: print('No header "Tensile stress at Yield (Offset 0.2 %)" found')
+        try: self.max_force = df['Max Force']
+        except: print('No header "Max Force" found')
+        try: self.maxforce_tensilestress = df['Tensile stress at Max Force']
+        except: print('No header "Tensile stress at Max Force" found')
+        try: self.maxforce_tensilestrain = df['Tensile strain at Max Force']
+        except: print('No header "Tensile strain at Max Force" found')
+        try: self.break_tensilestrain = df['Tensile strain at Break ']
+        except: print('No header "Tensile strain at Break " found')
+        try: self.modulus = df['Modulus ']
+        except: print('No header "Modulus " found')
+        try: self.elongation = df['Elongation (%) Calipers']
+        except: print('No header "Elongation (%) Calipers" fond')
+        try: self.area_reduction = df['Reduction of area']
+        except: print('No header "Reduction of area" found')
+        try: self.temp = df['Test Temperature (°F)'] 
+        except: print('No header "Test Temperature (°F)" found')
 
     def sort_by_temp(self, temp):
         return subset(self.df[self.temp==temp][self.df['MC'].notna()])
