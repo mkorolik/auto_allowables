@@ -1,7 +1,7 @@
 from tkinter import *
 from allowable_guifunctions import *
 from tkinter import ttk
-
+from customtkinter import *
 
 root = Tk()
 root.title('Autogenerate Allowable')
@@ -12,7 +12,7 @@ root.rowconfigure(0, weight=1)
 frame1 = Frame(root, width=250, height=450)
 frame1.grid(row=0, column=0, padx=10, pady=5)
 
-frame2 = Frame(root, width=600, height=450)
+frame2 = CTkScrollableFrame(root, width=600, height=450)
 frame2.grid(row=0, column=1, padx=10, pady=5)
 
 frame3 = Frame(root, width=600, height=150)

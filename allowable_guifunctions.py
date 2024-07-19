@@ -46,7 +46,7 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
     allowable_norm, allowable_weib, allowable_gamma = allowables
     p_norm, p_weib, p_gamma = ps
     
-
+    Label(frame_text, text=q, fg='blue').grid()
     Label(frame_text, text=f'Mean: {mean:.2f}; StDev: {stdev:.2f}').grid()
     Label(frame_text, text=f'Normal method: {allowable_norm:.3f}, p = {p_norm:.2f}').grid()
     Label(frame_text, text=f'Weibull (ish) method: {allowable_weib:.3f}, p = {p_weib:.2f}').grid()
