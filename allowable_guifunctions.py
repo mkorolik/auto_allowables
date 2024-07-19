@@ -113,7 +113,7 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
         def get_sort(*args):
             def get_sort_var(*args):
             # sort data
-                # convert value you are sorting by (ie RT) to flaot if it is numeric; else keep as string
+                # convert value you are sorting by (ie RT) to float if it is numeric; else keep as string
                 sv = sort_var.get()
                 try:
                     sv = float(sv)
@@ -133,7 +133,15 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
             sort_var.trace_add("write", get_sort_var)
 
             # dropdown for options
-            drop_sv = OptionMenu(frame, sort_var, *list(set(dataset.df[sort_by.get()]))).grid(row=drop_s.grid_info()['row'], column=drop_s.grid_info()['column'] + 1)
+            # drop_sv = OptionMenu(
+            #     frame, sort_var, *list(set(dataset.df[sort_by.get()]))
+            #     ).grid(row=drop_s.grid_info()['row'], column=drop_s.grid_info()['column'] + 1)
+            drop_sv = Menubutton(frame, text='Sort Variable')
+            drop_sv.menu = Menu(drop_sv)
+            drop_sv["menu"] = drop_sv.menu
+            for var in list(set(dataset.df[sort_by.get()])):
+                drop_sv.menu.add_checkbutton(label=var)                             
+            drop_sv.grid(row=drop_s.grid_info()['row'], column=drop_s.grid_info()['column'] + 1)
 
     # begin sort
         sort_by = StringVar()

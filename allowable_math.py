@@ -178,18 +178,14 @@ class subset:
     def plot_dists(self, y, ax=None, units=''):
         data = self.df[y]
 
-        print(np.mean(data), np.std(data, ddof=1), len(data))
-
         if ax is None:
             ax = plt.gca()
         
-        ps = []
 
         for i in range(len(types)):
-            ps.append(fit(data, types[i], ax=ax, type_name=type_names[i], lc=colors[i]))
+            fit(data, types[i], ax=ax, type_name=type_names[i], lc=colors[i])
 
         allow, type_ = self.get_allowable(y)
-        print(allow)
 
         ax.axvline(x=allow, color='magenta', linestyle='--', label=f'{allow:.1f}' + units + ' (' + type_ + ')')
 
@@ -197,7 +193,6 @@ class subset:
         ax.set_ylabel('Normalized Density')
         ax.legend()
 
-        print(ps)
 
 
     def plot_temperature(self, y, ax=None, temp=None, deg=1):
@@ -226,7 +221,7 @@ class subset:
         ax.plot(x, np.polyval(params, x), label=params)
 
         ax.set_xlabel(temp_name)
-        ax.set_label(y)
+        ax.set_ylabel(y)
         ax.legend()
         
         

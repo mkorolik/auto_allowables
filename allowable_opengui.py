@@ -4,7 +4,7 @@ from tkinter import ttk
 from customtkinter import *
 
 root = Tk()
-root.title('Autogenerate Allowable')
+root.title('Autogenerate Allowable MK')
 
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
