@@ -133,15 +133,10 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
             sort_var.trace_add("write", get_sort_var)
 
             # dropdown for options
-            # drop_sv = OptionMenu(
-            #     frame, sort_var, *list(set(dataset.df[sort_by.get()]))
-            #     ).grid(row=drop_s.grid_info()['row'], column=drop_s.grid_info()['column'] + 1)
-            drop_sv = Menubutton(frame, text='Sort Variable')
-            drop_sv.menu = Menu(drop_sv)
-            drop_sv["menu"] = drop_sv.menu
-            for var in list(set(dataset.df[sort_by.get()])):
-                drop_sv.menu.add_checkbutton(label=var)                             
-            drop_sv.grid(row=drop_s.grid_info()['row'], column=drop_s.grid_info()['column'] + 1)
+            drop_sv = OptionMenu(
+                frame, sort_var, *list(set(dataset.df[sort_by.get()]))
+                ).grid(row=drop_s.grid_info()['row'], column=drop_s.grid_info()['column'] + 1)
+            
 
     # begin sort
         sort_by = StringVar()
