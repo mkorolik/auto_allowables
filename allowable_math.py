@@ -16,10 +16,10 @@ import statsmodels.api as sm
 import math
 
 
-# types = [norm, weibull_min, gamma]
-types = [norm, gamma]
-# type_names = ['Normal', 'Weibull', 'Gamma']
-type_names = ['Normal', 'Gamma']
+types = [norm, weibull_min, gamma]
+# types = [norm, gamma]
+type_names = ['Normal', 'Weibull', 'Gamma']
+# type_names = ['Normal', 'Gamma']
 colors = ['orange', 'green', 'red']
 
 
@@ -49,7 +49,7 @@ def fit(data, type, ax=None, type_name=None, plot=True, plot_hist=True, hc='ligh
     else:
         values, bins = np.histogram(data, density=True)
 
-    x = np.linspace(bins[0]-15, bins[-1]+10, 100)
+    x = np.linspace(bins[0]-5, bins[-1]+5, 100)
 
     AD = sm.stats.diagnostic.anderson_statistic(data, type)
     p = p_value(AD)
@@ -130,7 +130,15 @@ class subset:
     def sort(self, sortby, sortvar):
         return subset(self.df[self.df[sortby]==sortvar][self.df['MC'].notna()])
     
-    
+    def get_ps(self, y):
+        data = self.df[y]
+
+        ps = []
+        for type in types:
+            ps.append(fit(data, type, plot=False, plot_hist=False))
+        
+        return ps
+
     def get_allowable(self, y, weib=False, all_types=None):
         data = self.df[y]
 
@@ -182,5 +190,34 @@ class subset:
 
         print(ps)
 
+
+    def plot_temperature(self, y, ax=None, temp=None, deg=1):
+        data = np.array(self.df[y])
+
+        if ax is None:
+            ax = plt.gca()        
+
+        if temp is None:
+            temp_data = np.array(self.temp)
+            temp_name = 'Temperature (°F)'
+        else:
+            temp_data = np.array(self.df[temp])
+            temp_name = temp
+
+        temperatures = list(set(temp_data))
+        data_binned = []
+        for t in temperatures:
+            data_binned.append(np.mean(data[np.argwhere(temp_data==t)]))
+
+        params = np.polyfit(temperatures, data_binned, deg)
+        x = np.linspace(temperatures[0]- 10, temperatures[-1]+10, 100)
+
+        ax.scatter(temp_data, data, color='lightblue', alpha=0.7)
+        ax.scatter(temperatures, data_binned)
+        ax.plot(x, np.polyval(params, x), label=params)
+
+        ax.set_xlabel(temp_name)
+        ax.set_label(y)
+        ax.legend()
         
         
