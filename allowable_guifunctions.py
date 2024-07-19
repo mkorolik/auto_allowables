@@ -22,7 +22,9 @@ def get_alls():
 
 def display(frame_plots, frame_text, c=None, r=None, *args):
 # display distribution plots with calculated allowable for currently selected property in sorted or unsorted dataset; takes in frame input and grid column/row input
-    fig, axs = plt.subplots()
+    # fig, axs = plt.subplots()
+    fig = Figure()
+    axs = fig.add_subplot(111)
 
     q = chosen_quantity.get()
 
@@ -51,6 +53,23 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
     Label(frame_text, text=f'Gamma method: {allowable_gamma:.3f}, p = {p_gamma:.2f}').grid()
 
 
+def plot_temp(frame):
+    # fig, axs = plt.subplots()
+    fig = Figure()
+    axs = fig.add_subplot(111)
+
+    q = chosen_quantity.get()
+
+    try:
+        data_select.plot_temperature(q, ax=axs)
+    except:
+        dataset.plot_temperature(q, ax=axs)
+
+    canvas2 = FigureCanvasTkAgg(fig, master=frame)
+    canvas2.draw()
+
+    canvas2.get_tk_widget().grid()
+
 
 def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 # INPUTS:
@@ -74,6 +93,9 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
     chosen_quantity.set("Choose Quantity")
     chosen_quantity.trace_add("write", lambda a, b, c: display(frame_plots, frame_text))
     drop = OptionMenu(frame_browse, chosen_quantity, *dataset.headers).grid()
+
+# temperature curve
+    button_temp = Button(frame_browse, text="Plot Temperature Curve", command = lambda: plot_temp(frame_text)).grid()
 
 # creates button for initiating a new sort
     button_sort = Button(frame_browse, text = "New Sort", command = lambda: select(frame_selections)).grid()
