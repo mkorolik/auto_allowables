@@ -79,14 +79,17 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 
 # open file from file explorer, prints path
     global path
-    path = filedialog.askopenfilename(initialdir = r'/', title = "Select a File", filetypes = (("Excel files", "*.xlsx*"), ("all files", "*.*")))
+    path = filedialog.askopenfilename(initialdir = r'/', title = "Select a File", filetypes = (("Excel files", "*.xlsx*"), ("CSV files", "*.csv"), ("all files", "*.*")))
 
     label_file_explorer = Label(frame_browse, fg = "blue")
     label_file_explorer.configure(text="File Opened: "+path)
 
 # opens excel file as subset class from allowable_math
     global dataset
-    dataset = subset(pd.read_excel(path)[pd.read_excel(path)['MC'].notna()])
+    try:
+        dataset = subset(pd.read_excel(path)[pd.read_excel(path)['MC'].notna()])
+    except:
+        dataset = subset(pd.read_csv(path)[pd.read_csv(path)['MC'].notna()])
 
 # creates variable, tracer, and dropdown menu for quantity you want to analyze
     global chosen_quantity
