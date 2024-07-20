@@ -170,7 +170,9 @@ class subset:
             allowable = get_interval_gamma(data)
 
         if all_types is True:
-            print(get_interval_normal(data), get_interval_weibull(data), get_interval_gamma(data))
+            print(y)
+            print(f'Normal method: {get_interval_normal(data):.3f}; Weibull (sort of not really) Method: {get_interval_weibull(data):.3f}; Gamma Method: {get_interval_gamma(data):.3f}')
+            print(f'Average: {np.mean(data):.3f}; StDev: {np.std(data, ddof=1):.3f}')
             return [get_interval_normal(data), get_interval_weibull(data), get_interval_gamma(data)]
         else:
             return [allowable, best_type_name]
