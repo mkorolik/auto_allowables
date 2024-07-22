@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import filedialog
-
+from tkinter import ttk
     
 
 def get_alls():
@@ -96,9 +96,7 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
             dataset = subset(pd.read_csv(path)[pd.read_csv(path)['MC'].notna()])
         except:
             dataset = subset(pd.read_csv(path, skiprows=1)[pd.read_csv(path, skiprows=1)['MC'].notna()])
-            print('hi')
 
-    print(len(dataset.df))
 
 # creates variable, tracer, and dropdown menu for quantity you want to analyze
     global chosen_quantity
@@ -145,15 +143,31 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
                 except:
                     data_select = dataset.sort(sort_by.get(), sv)
             
+            def sort_mult(sel, *args):
+                print(sel)
+                global data_select 
+                try:
+                    data_select = data_select.sort(sort_by.get(), sel)
+                except:
+                    data_select = dataset.sort(sort_by.get(), sel)
+            
         # get column you are sorting by (ie Temperature) and the options in that column
             sort_var = StringVar()
             sort_var.set("Sort Variable")
             sort_var.trace_add("write", get_sort_var)
 
-            # dropdown for options
-            drop_sv = OptionMenu(
-                frame, sort_var, *list(set(dataset.df[sort_by.get()]))
-                ).grid(row=drop_s.grid_info()['row'], column=drop_s.grid_info()['column'] + 1)
+            mult_sv = Listbox(frame_selections, selectmode="multiple", exportselection=0, height=len(list(set(dataset.df[sort_by.get()]))))
+            for value in list(set(dataset.df[sort_by.get()])):
+                mult_sv.insert(END, value)
+            
+            def update_selection():
+                global selected
+                selected = [mult_sv.get(idx) for idx in mult_sv.curselection()]
+
+            mult_sv.bind("<<ListboxSelect>>", lambda _: update_selection())
+            mult_sv.grid()
+
+            print_sortvars = Button(frame_selections, text='Sort', command = lambda: sort_mult(selected)).grid()
             
 
     # begin sort

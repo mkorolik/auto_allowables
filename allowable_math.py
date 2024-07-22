@@ -137,7 +137,17 @@ class subset:
         except: print('No header "Test Temperature (°F)" found')
     
     def sort(self, sortby, sortvar):
-        return subset(self.df[self.df[sortby]==sortvar][self.df['MC'].notna()])
+        try:
+            return subset(self.df[self.df[sortby]==sortvar])
+        except:
+            if len(sortvar)==1:
+                return subset(self.df[self.df[sortby]==sortvar[0]])
+            if len(sortvar)==2:
+                return subset(self.df[(self.df[sortby]==sortvar[0]) | (self.df[sortby]==sortvar[1])])
+            if len(sortvar)==3:
+                return subset(self.df[(self.df[sortby]==sortvar[0]) | (self.df[sortby]==sortvar[1]) | (self.df[sortby]==sortvar[2])])
+            else:
+                print(f'selected {len(sortvar)} options but can only handle up to 3 right now')
     
     def get_ps(self, y):
         data = self.df[y].values.astype(float)
