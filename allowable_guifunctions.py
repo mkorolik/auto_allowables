@@ -79,7 +79,7 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 
 # open file from file explorer, prints path
     global path
-    path = filedialog.askopenfilename(initialdir = r'/', title = "Select a File", filetypes = (("Excel files", "*.xlsx*"), ("CSV files", "*.csv"), ("all files", "*.*")))
+    path = filedialog.askopenfilename(title = "Select a File", filetypes = (("Excel files", "*.xlsx*"), ("CSV files", "*.csv"), ("all files", "*.*")))
 
     label_file_explorer = Label(frame_browse, fg = "blue")
     label_file_explorer.configure(text="File Opened: "+path)
@@ -135,9 +135,7 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
                 except:
                     data_select = dataset.sort(sort_by.get(), sel)
             
-        # get column you are sorting by (ie Temperature) and the options in that column
-
-            mult_sv = Listbox(frame_selections, selectmode="multiple", exportselection=0, height=len(list(set(dataset.df[sort_by.get()]))))
+            mult_sv = Listbox(frame, selectmode="multiple", exportselection=0, height=len(list(set(dataset.df[sort_by.get()]))))
             for value in list(set(dataset.df[sort_by.get()])):
                 mult_sv.insert(END, value)
             
@@ -148,7 +146,7 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
             mult_sv.bind("<<ListboxSelect>>", lambda _: update_selection())
             mult_sv.grid()
 
-            print_sortvars = Button(frame_selections, text='Sort', command = lambda: sort_mult(selected)).grid()
+            print_sortvars = Button(frame, text='Sort', command = lambda: sort_mult(selected)).grid()
             
 
     # begin sort
