@@ -12,10 +12,10 @@ def get_alls():
 # print all allowables for currently selected property; works for both sorted and unsorted
     try:
         return [data_select.get_allowable(chosen_quantity.get(), all_types=True), data_select.get_ps(chosen_quantity.get()), 
-                np.mean(data_select.df[chosen_quantity.get()]), np.std(data_select.df[chosen_quantity.get()])]
+                np.mean(data_select.df[chosen_quantity.get()].values.astype(float)), np.std(data_select.df[chosen_quantity.get()].values.astype(float), ddof=1)]
     except: 
         return [dataset.get_allowable(chosen_quantity.get(), all_types=True), dataset.get_ps(chosen_quantity.get()),
-                np.mean(dataset.df[chosen_quantity.get()]), np.std(dataset.df[chosen_quantity.get()])]
+                np.mean(dataset.df[chosen_quantity.get()].values.astype(float)), np.std(dataset.df[chosen_quantity.get()].values.astype(float), ddof=1)]
 
     
 
@@ -53,7 +53,7 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
     Label(frame_text, text=f'Gamma method: {allowable_gamma:.3f}, p = {p_gamma:.2f}').grid()
 
 
-def plot_temp(frame_plot, frame_drop):
+def plot_temp(frame_plot, *args):
     # fig, axs = plt.subplots()
     fig = Figure()
     axs = fig.add_subplot(111)
@@ -62,9 +62,9 @@ def plot_temp(frame_plot, frame_drop):
 
 
     try:
-        data_select.plot_temperature(q, ax=axs, deg=degree.get())
+        data_select.plot_temperature(q, ax=axs, temp=temp.get(), deg=degree.get())
     except:
-        dataset.plot_temperature(q, ax=axs, deg=degree.get())
+        dataset.plot_temperature(q, ax=axs, temp=temp.get(), deg=degree.get())
 
     canvas2 = FigureCanvasTkAgg(fig, master=frame_plot)
     canvas2.draw()
@@ -87,9 +87,18 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 # opens excel file as subset class from allowable_math
     global dataset
     try:
-        dataset = subset(pd.read_excel(path)[pd.read_excel(path)['MC'].notna()])
+        try:
+            dataset = subset(pd.read_excel(path)[pd.read_excel(path)['MC'].notna()])
+        except:
+            dataset = subset(pd.read_excel(path, skiprows=1)[pd.read_excel(path, skiprows=1)['MC'].notna()])
     except:
-        dataset = subset(pd.read_csv(path)[pd.read_csv(path)['MC'].notna()])
+        try:
+            dataset = subset(pd.read_csv(path)[pd.read_csv(path)['MC'].notna()])
+        except:
+            dataset = subset(pd.read_csv(path, skiprows=1)[pd.read_csv(path, skiprows=1)['MC'].notna()])
+            print('hi')
+
+    print(len(dataset.df))
 
 # creates variable, tracer, and dropdown menu for quantity you want to analyze
     global chosen_quantity
@@ -103,7 +112,13 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
     degree = IntVar()
     degree.set("Degree")
 
-    button_temp = Button(frame_browse, text="Plot Temperature Curve", command = lambda: plot_temp(frame_plots, frame_browse))
+    global temp 
+    temp = StringVar()
+    temp.set("Plot Temperature Curve")
+    temp.trace_add("write", lambda a, b, c: plot_temp(frame_plots))
+
+    # button_temp = Button(frame_browse, text="Plot Temperature Curve", command = lambda: plot_temp(frame_plots, frame_browse))
+    button_temp = OptionMenu(frame_browse, temp, *dataset.headers)
     button_temp.grid()
 
     drop_t = OptionMenu(frame_browse, degree, *[1, 2, 3, 4]).grid(row=button_temp.grid_info()['row'], column=button_temp.grid_info()['column']+1)

@@ -140,7 +140,7 @@ class subset:
         return subset(self.df[self.df[sortby]==sortvar][self.df['MC'].notna()])
     
     def get_ps(self, y):
-        data = self.df[y]
+        data = self.df[y].values.astype(float)
 
         ps = []
         for type in types:
@@ -149,7 +149,7 @@ class subset:
         return ps
 
     def get_allowable(self, y, weib=False, all_types=False):
-        data = self.df[y]
+        data = self.df[y].values.astype(float)
 
         ps = []
 
@@ -178,7 +178,7 @@ class subset:
             return [allowable, best_type_name]
     
     def plot_dists(self, y, ax=None, units=''):
-        data = self.df[y]
+        data = self.df[y].values.astype(float)
 
         if ax is None:
             ax = plt.gca()
