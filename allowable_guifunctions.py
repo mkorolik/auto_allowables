@@ -127,22 +127,6 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 # sorting 
     def select(frame):
         def get_sort(*args):
-            def get_sort_var(*args):
-            # sort data
-                # convert value you are sorting by (ie RT) to float if it is numeric; else keep as string
-                sv = sort_var.get()
-                try:
-                    sv = float(sv)
-                except:
-                    sv = sv
-
-                # create variable for sorted data; if data has already been sorted, further sort the sorted data; else sort original data
-                global data_select 
-                try:
-                    data_select = data_select.sort(sort_by.get(), sv)
-                except:
-                    data_select = dataset.sort(sort_by.get(), sv)
-            
             def sort_mult(sel, *args):
                 print(sel)
                 global data_select 
@@ -152,9 +136,6 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
                     data_select = dataset.sort(sort_by.get(), sel)
             
         # get column you are sorting by (ie Temperature) and the options in that column
-            sort_var = StringVar()
-            sort_var.set("Sort Variable")
-            sort_var.trace_add("write", get_sort_var)
 
             mult_sv = Listbox(frame_selections, selectmode="multiple", exportselection=0, height=len(list(set(dataset.df[sort_by.get()]))))
             for value in list(set(dataset.df[sort_by.get()])):
