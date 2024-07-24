@@ -112,7 +112,7 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 
     global temp 
     temp = StringVar()
-    temp.set("Plot Temperature Curve")
+    temp.set("Choose Temperature Column for Temperature Curve")
     temp.trace_add("write", lambda a, b, c: plot_temp(frame_plots))
 
     # button_temp = Button(frame_browse, text="Plot Temperature Curve", command = lambda: plot_temp(frame_plots, frame_browse))
