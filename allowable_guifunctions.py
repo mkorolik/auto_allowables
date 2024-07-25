@@ -6,6 +6,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import filedialog
 from tkinter import ttk
+from PIL import Image
     
 
 def get_alls():
@@ -43,8 +44,8 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
         canvas.get_tk_widget().grid(column=c, row=r)
 
     allowables, ps, mean, stdev = get_alls()    
-    allowable_norm, allowable_weib, allowable_gamma = allowables
-    p_norm, p_weib, p_gamma = ps
+    allowable_norm, allowable_gamma, allowable_weib = allowables
+    p_norm,p_gamma, p_weib = ps
     
     Label(frame_text, text=q, fg='blue').grid()
     Label(frame_text, text=f'Mean: {mean:.2f}; StDev: {stdev:.2f}').grid()
@@ -58,6 +59,13 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
         # for pair in all_sorts:
         #     texts.append(f'{pair[0]}: {pair[1]}')
         Label(frame_text, text=all_sorts).grid()
+
+    # def save():
+    #     filename = filedialog.asksaveasfile(mode='w', filetypes=[('JPEG', '*.jpeg'), ('PNG', '*.png'), ('All Files', '*.*')])
+    #     img = Image(fig)
+    #     img.save(filename)
+
+    # Button(frame_text, text='Save All Images', command=save).grid()
             
 
 def plot_temp(frame_plot, *args):
@@ -69,16 +77,21 @@ def plot_temp(frame_plot, *args):
 
 
     try:
-        temp_fit = data_select.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
+        temp_fit, r2 = data_select.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
     except:
-        temp_fit = dataset.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
+        temp_fit, r2 = dataset.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
 
     canvas2 = FigureCanvasTkAgg(fig, master=frame_plot)
     canvas2.draw()
 
     canvas2.get_tk_widget().grid()
 
-    Label(frame_plot, text=f'Temperature equation (ax^n + bx^(n-1) + ...): {np.round(temp_fit, 3)}').grid()
+    np.set_printoptions(precision=3)
+
+    Label(frame_plot, text=f'Temperature fit (ax^n + bx^(n-1) + ...): {temp_fit}').grid()
+    Label(frame_plot, text=f'R2 = {r2[0]}').grid()
+    print(f'Temperature fit: {temp_fit}')
+    print(f'R2 = {r2[0]}')
 
 
 def get_files(frame_browse, frame_selections, frame_plots, frame_text):
@@ -118,24 +131,26 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
     global chosen_quantity
     chosen_quantity = StringVar()
     chosen_quantity.set("Choose Quantity")
-    chosen_quantity.trace_add("write", lambda a, b, c: display(frame_plots, frame_text))
+    # chosen_quantity.trace_add("write", lambda a, b, c: display(frame_plots, frame_text))
     drop = OptionMenu(frame_browse, chosen_quantity, *dataset.headers).grid()
 
 # temperature curve
     global degree
     degree = IntVar()
     degree.set("Degree")
+    drop_t = OptionMenu(frame_browse, degree, *[1, 2, 3, 4]).grid()
 
     global temp 
     temp = StringVar()
     temp.set("Choose Temperature Column for Temperature Curve")
-    temp.trace_add("write", lambda a, b, c: plot_temp(frame_plots))
-
+    # temp.trace_add("write", lambda a, b, c: plot_temp(frame_plots))
     # button_temp = Button(frame_browse, text="Plot Temperature Curve", command = lambda: plot_temp(frame_plots, frame_browse))
     button_temp = OptionMenu(frame_browse, temp, *dataset.headers)
     button_temp.grid()
 
-    drop_t = OptionMenu(frame_browse, degree, *[1, 2, 3, 4]).grid(row=button_temp.grid_info()['row'], column=button_temp.grid_info()['column']+1)
+    Button(frame_browse, text='Plot distributions', command= lambda: display(frame_plots, frame_text)).grid(row=button_temp.grid_info()['row']+3, column=button_temp.grid_info()['column'])
+    Button(frame_browse, text='Plot Temperature', command = lambda: plot_temp(frame_plots)).grid(row=button_temp.grid_info()['row']+4, column=button_temp.grid_info()['column'])
+
 
 # creates button for initiating a new sort
     button_sort = Button(frame_selections, text = "New Sort", command = lambda: select(frame_selections)).grid()

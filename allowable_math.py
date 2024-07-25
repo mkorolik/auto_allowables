@@ -123,9 +123,9 @@ def get_interval_weibull(data, p=0.99, conf=0.95):
 
     # x = - x_[np.argmin(np.abs(gs))]
     #TEMPORARY:
-    x = np.log(-np.log(conf))
+    x = - np.log(-np.log(conf))
 
-    L_ = mean - x * std
+    L_ = loc - x * scale
 
     L = np.exp(L_)
     
@@ -185,7 +185,7 @@ class subset:
 
         if all_types is True:
             print(y)
-            pn, pw, pg = self.get_ps(y)
+            pn, pg, pw = self.get_ps(y)
             print(f'Average: {np.mean(data):.3f}; StDev: {np.std(data, ddof=1):.3f}')
             print(f'Normal method: {get_interval_normal(data):.3f}, p = {pn}')
             print(f'Gamma Method: {get_interval_gamma(data):.3f}, p = {pg}')
@@ -213,30 +213,30 @@ class subset:
         ax.legend()
 
 
-
     def plot_temperature(self, y, temp, ax=None, deg=1):
         data = np.array(self.df[y])
 
         if ax is None:
             ax = plt.gca()        
 
-        temp_data = np.array(self.df[temp] / 70)
+        temp_data = np.array(self.df[temp])
 
         temperatures = list(set(temp_data))
         data_binned = []
         for t in temperatures:
             data_binned.append(np.mean(data[np.argwhere(temp_data==t)]))
 
-        params = np.polyfit(temperatures, data_binned, deg)
+        params, residuals, rank, sv, rcond = np.polyfit(temperatures, data_binned, deg, full=True)
+        r2 = 1 - residuals/np.sum(np.abs(data - np.mean(data)))
+
         x = np.linspace(min(temperatures)-1, max(temperatures)+1, 100)
 
         ax.scatter(temp_data, data, color='lightblue', alpha=0.7)
         ax.scatter(temperatures, data_binned)
         ax.plot(x, np.polyval(params, x))
 
-        ax.set_xlabel('RT %')
+        ax.set_xlabel(temp)
         ax.set_ylabel(y)
-        ax.legend()
         
-        return params
+        return params, r2
         
