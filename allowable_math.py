@@ -3,11 +3,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from scipy.stats import norm
-from scipy.stats import weibull_min
+from scipy.stats import gumbel_r
 from scipy.stats import gamma
 
 from scipy.stats import nct
 from scipy.optimize import root
+from scipy.special import factorial
 
 from scipy import integrate
 
@@ -16,9 +17,9 @@ import statsmodels.api as sm
 import math
 
 
-types = [norm, weibull_min, gamma]
+types = [norm, gamma, gumbel_r]
 # types = [norm, gamma]
-type_names = ['Normal', 'Weibull', 'Gamma']
+type_names = ['Normal', 'Gamma', 'Weibull']
 # type_names = ['Normal', 'Gamma']
 colors = ['orange', 'green', 'red']
 
@@ -60,7 +61,7 @@ def fit(data, type, ax=None, type_name=None, plot=True, plot_hist=True, hc='ligh
     return p
 
 
-def get_interval_normal(data, p=0.99, conf=1-0.95):
+def get_interval_normal(data, p=0.99, conf=0.95):
     n = len(data)
 
     qp = norm.ppf(p, loc=np.mean(data), scale=np.std(data, ddof=1))
@@ -68,15 +69,14 @@ def get_interval_normal(data, p=0.99, conf=1-0.95):
 
     nc = zp * np.sqrt(n)
 
-    # t = nct(df=n-1, nc=nc).ppf(conf)
-    t = nct.ppf(1-conf, df=n-1, nc=nc)
+    t = nct.ppf(conf, df=n-1, nc=nc)
 
     L = np.mean(data) - t * np.std(data, ddof=1)/np.sqrt(n)
 
     return L
 
 
-def get_interval_gamma(data, p=0.99, conf=1-0.95):
+def get_interval_gamma(data, p=0.99, conf=0.95):
     data_transformed = data**(1/3)
 
     L_ = get_interval_normal(data_transformed, p=p, conf=conf)
@@ -86,19 +86,48 @@ def get_interval_gamma(data, p=0.99, conf=1-0.95):
     return L
 
 
-def get_interval_weibull(data, p=0.99, conf=1-0.95):
-    
+def get_interval_weibull(data, p=0.99, conf=0.95):
     data_transformed = np.log(data)
 
-    shape, location, scale = weibull_min.fit(data_transformed)
+    loc, scale = gumbel_r.fit(data_transformed)
+    mean = (loc - np.euler_gamma * scale)
+    std = np.sqrt(np.pi**2 * scale**2 / 6)
 
-    alpha = np.log(-np.log(1-conf))
+    z = (data_transformed - mean)/std
+    n = len(data_transformed)
 
-    L_ = weibull_min.mean(shape, loc=location, scale=scale) + alpha * weibull_min.std(shape, loc=location, scale=scale)
+    
+    def cz():
+        def integrand_cz(t):
+            return t**(n-2) * np.exp( (t-1) * np.sum(z) ) / ( 1/n * np.sum(np.exp(z*t)))**n
+        return 1 / integrate.quad(integrand_cz, -1, 1)[0]
+
+
+    def ig(s):
+        def integrand_ig(t):
+            return t**(n-1) * np.exp(-t)
+        return integrate.quad(integrand_ig, 0, s)[0] / factorial(n-1)
+
+    def g(x):
+        def integrand_g(t):
+            return t**(n-2) * np.exp( (t-1) * np.sum(z) ) * ig(np.exp(np.log(-np.log(p)) -x*t) * np.sum(np.exp(z*t))) / ((1/n * np.sum(np.exp(z*t)))**n)
+        return cz() * integrate.quad(integrand_g, -1, 1)[0]
+    
+    x_ = np.linspace(-3*np.std(data), 3*np.std(data), 200)
+    gs = []
+    for x in x_:
+        try:
+            gs.append(g(x) - conf)
+        except:
+            print("Error in Weibull limit calculation. Is your standard deviation too large?")
+
+    x = - x_[np.argmin(np.abs(gs))]
+
+    L_ = mean - x * std
 
     L = np.exp(L_)
-
-    return L
+    
+    return(L)
 
 
 
@@ -151,7 +180,7 @@ class subset:
         if best_type_name == 'Normal':
             allowable = get_interval_normal(data)
         if best_type_name == 'Weibull':
-            raise NotImplementedError('Weibull allowables are not yet supported')
+            allowable = get_interval_weibull(data)
         if best_type_name == 'Gamma':
             allowable = get_interval_gamma(data)
 
@@ -159,10 +188,10 @@ class subset:
             print(y)
             pn, pw, pg = self.get_ps(y)
             print(f'Normal method: {get_interval_normal(data):.3f}, p = {pn}')
-            print(f'Weibull (sort of not really) Method: {get_interval_weibull(data):.3f}, p = {pw}')
             print(f'Gamma Method: {get_interval_gamma(data):.3f}, p = {pg}')
+            print(f'Weibull (ish) Method: {get_interval_weibull(data):.3f}, p = {pw}')
             print(f'Average: {np.mean(data):.3f}; StDev: {np.std(data, ddof=1):.3f}')
-            return [get_interval_normal(data), get_interval_weibull(data), get_interval_gamma(data)]
+            return [get_interval_normal(data), get_interval_gamma(data), get_interval_weibull(data)]
         else:
             return [allowable, best_type_name]
     

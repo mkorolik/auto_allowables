@@ -86,16 +86,19 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 
 # opens excel file as subset class from allowable_math
     global dataset
-    try:
-        try:
-            dataset = subset(pd.read_excel(path)[pd.read_excel(path)['MC'].notna()])
-        except:
-            dataset = subset(pd.read_excel(path, skiprows=1)[pd.read_excel(path, skiprows=1)['MC'].notna()])
+    try:  
+        try:  # excel file
+            try:  # no pre-header rows
+                dataset = subset(pd.read_excel(path)[pd.read_excel(path)['MC'].notna()])
+            except:
+                dataset = subset(pd.read_excel(path, skiprows=1)[pd.read_excel(path, skiprows=1)['MC'].notna()])
+        except:  # csv file
+            try:  # no pre-header rows
+                dataset = subset(pd.read_csv(path)[pd.read_csv(path)['MC'].notna()])
+            except:
+                dataset = subset(pd.read_csv(path, skiprows=1)[pd.read_csv(path, skiprows=1)['MC'].notna()])
     except:
-        try:
-            dataset = subset(pd.read_csv(path)[pd.read_csv(path)['MC'].notna()])
-        except:
-            dataset = subset(pd.read_csv(path, skiprows=1)[pd.read_csv(path, skiprows=1)['MC'].notna()])
+        print("There's something wrong with your file format. Try checking your MC header")
 
 
 # creates variable, tracer, and dropdown menu for quantity you want to analyze
