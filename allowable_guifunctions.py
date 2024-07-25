@@ -51,7 +51,14 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
     Label(frame_text, text=f'Normal method: {allowable_norm:.3f}, p = {p_norm:.2f}').grid()
     Label(frame_text, text=f'Weibull (ish) method: {allowable_weib:.3f}, p = {p_weib:.2f}').grid()
     Label(frame_text, text=f'Gamma method: {allowable_gamma:.3f}, p = {p_gamma:.2f}').grid()
-
+    if len(all_sorts)==0:
+        Label(frame_text, text='Unsorted').grid()
+    else:
+        # texts = []
+        # for pair in all_sorts:
+        #     texts.append(f'{pair[0]}: {pair[1]}')
+        Label(frame_text, text=all_sorts).grid()
+            
 
 def plot_temp(frame_plot, *args):
     # fig, axs = plt.subplots()
@@ -62,14 +69,16 @@ def plot_temp(frame_plot, *args):
 
 
     try:
-        data_select.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
+        temp_fit = data_select.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
     except:
-        dataset.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
+        temp_fit = dataset.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
 
     canvas2 = FigureCanvasTkAgg(fig, master=frame_plot)
     canvas2.draw()
 
     canvas2.get_tk_widget().grid()
+
+    Label(frame_plot, text=f'Temperature equation (ax^n + bx^(n-1) + ...): {np.round(temp_fit, 3)}').grid()
 
 
 def get_files(frame_browse, frame_selections, frame_plots, frame_text):
@@ -84,19 +93,23 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
     label_file_explorer = Label(frame_browse, fg = "blue")
     label_file_explorer.configure(text="File Opened: "+path)
 
+    na_values = ["", "#N/A", "#N/A N/A", "#NA", "-1.#IND", "-1.#QNAN","-NaN", "-nan", "1.#IND", "1.#QNAN", "<NA>", "N/A", 
+#              "NA", 
+             "NULL", "NaN", "n/a", "nan", "null"]
+
 # opens excel file as subset class from allowable_math
     global dataset
     try:  
         try:  # excel file
             try:  # no pre-header rows
-                dataset = subset(pd.read_excel(path)[pd.read_excel(path)['MC'].notna()])
+                dataset = subset(pd.read_excel(path, keep_default_na=False, na_values=na_values)[pd.read_excel(path)['MC'].notna()])
             except:
-                dataset = subset(pd.read_excel(path, skiprows=1)[pd.read_excel(path, skiprows=1)['MC'].notna()])
+                dataset = subset(pd.read_excel(path, skiprows=1, keep_default_na=False, na_values=na_values)[pd.read_excel(path, skiprows=1)['MC'].notna()])
         except:  # csv file
             try:  # no pre-header rows
-                dataset = subset(pd.read_csv(path)[pd.read_csv(path)['MC'].notna()])
+                dataset = subset(pd.read_csv(path, keep_default_na=False, na_values=na_values)[pd.read_csv(path)['MC'].notna()])
             except:
-                dataset = subset(pd.read_csv(path, skiprows=1)[pd.read_csv(path, skiprows=1)['MC'].notna()])
+                dataset = subset(pd.read_csv(path, skiprows=1, keep_default_na=False, na_values=na_values)[pd.read_csv(path, skiprows=1)['MC'].notna()])
     except:
         print("There's something wrong with your file format. Try checking your MC header")
 
@@ -126,12 +139,16 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 
 # creates button for initiating a new sort
     button_sort = Button(frame_selections, text = "New Sort", command = lambda: select(frame_selections)).grid()
+    global all_sorts
+    all_sorts = []
 
 # sorting 
     def select(frame):
         def get_sort(*args):
             def sort_mult(sel, *args):
-                print(sel)
+                print(sel[0])
+                all_sorts.append([sort_by.get(), sel])
+
                 global data_select 
                 try:
                     data_select = data_select.sort(sort_by.get(), sel)

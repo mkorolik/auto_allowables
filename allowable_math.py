@@ -113,15 +113,17 @@ def get_interval_weibull(data, p=0.99, conf=0.95):
             return t**(n-2) * np.exp( (t-1) * np.sum(z) ) * ig(np.exp(np.log(-np.log(p)) -x*t) * np.sum(np.exp(z*t))) / ((1/n * np.sum(np.exp(z*t)))**n)
         return cz() * integrate.quad(integrand_g, -1, 1)[0]
     
-    x_ = np.linspace(-3*np.std(data), 3*np.std(data), 200)
-    gs = []
-    for x in x_:
-        try:
-            gs.append(g(x) - conf)
-        except:
-            print("Error in Weibull limit calculation. Is your standard deviation too large?")
+    # x_ = np.linspace(-3*np.std(data), 3*np.std(data), 200)
+    # gs = []
+    # for x in x_:
+    #     try:
+    #         gs.append(g(x) - conf)
+    #     except:
+    #         print("Error in Weibull limit calculation. Is your standard deviation too large?")
 
-    x = - x_[np.argmin(np.abs(gs))]
+    # x = - x_[np.argmin(np.abs(gs))]
+    #TEMPORARY:
+    x = np.log(-np.log(conf))
 
     L_ = mean - x * std
 
@@ -218,8 +220,7 @@ class subset:
         if ax is None:
             ax = plt.gca()        
 
-        temp_data = np.array(self.df[temp])
-        temp_name = temp
+        temp_data = np.array(self.df[temp] / 70)
 
         temperatures = list(set(temp_data))
         data_binned = []
@@ -227,14 +228,15 @@ class subset:
             data_binned.append(np.mean(data[np.argwhere(temp_data==t)]))
 
         params = np.polyfit(temperatures, data_binned, deg)
-        x = np.linspace(temperatures[0]- 10, temperatures[-1]+10, 100)
+        x = np.linspace(min(temperatures)-1, max(temperatures)+1, 100)
 
         ax.scatter(temp_data, data, color='lightblue', alpha=0.7)
         ax.scatter(temperatures, data_binned)
-        ax.plot(x, np.polyval(params, x), label=params)
+        ax.plot(x, np.polyval(params, x))
 
-        ax.set_xlabel(temp_name)
+        ax.set_xlabel('RT %')
         ax.set_ylabel(y)
         ax.legend()
         
+        return params
         
