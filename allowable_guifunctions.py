@@ -62,9 +62,9 @@ def plot_temp(frame_plot, *args):
 
 
     try:
-        data_select.plot_temperature(q, ax=axs, temp=temp.get(), deg=degree.get())
+        data_select.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
     except:
-        dataset.plot_temperature(q, ax=axs, temp=temp.get(), deg=degree.get())
+        dataset.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
 
     canvas2 = FigureCanvasTkAgg(fig, master=frame_plot)
     canvas2.draw()

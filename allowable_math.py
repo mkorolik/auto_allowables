@@ -137,9 +137,6 @@ class subset:
     def __init__(self, df):
         self.df = df 
         self.headers = self.df.columns.values
-
-        try: self.temp = df['Test Temperature (°F)'] 
-        except: print('No header "Test Temperature (°F)" found')
     
     def sort(self, sortby, sortvar):
         try:
@@ -215,18 +212,14 @@ class subset:
 
 
 
-    def plot_temperature(self, y, ax=None, temp=None, deg=1):
+    def plot_temperature(self, y, temp, ax=None, deg=1):
         data = np.array(self.df[y])
 
         if ax is None:
             ax = plt.gca()        
 
-        if temp is None:
-            temp_data = np.array(self.temp)
-            temp_name = 'Temperature (°F)'
-        else:
-            temp_data = np.array(self.df[temp])
-            temp_name = temp
+        temp_data = np.array(self.df[temp])
+        temp_name = temp
 
         temperatures = list(set(temp_data))
         data_binned = []
