@@ -187,10 +187,10 @@ class subset:
         if all_types is True:
             print(y)
             pn, pw, pg = self.get_ps(y)
+            print(f'Average: {np.mean(data):.3f}; StDev: {np.std(data, ddof=1):.3f}')
             print(f'Normal method: {get_interval_normal(data):.3f}, p = {pn}')
             print(f'Gamma Method: {get_interval_gamma(data):.3f}, p = {pg}')
             print(f'Weibull (ish) Method: {get_interval_weibull(data):.3f}, p = {pw}')
-            print(f'Average: {np.mean(data):.3f}; StDev: {np.std(data, ddof=1):.3f}')
             return [get_interval_normal(data), get_interval_gamma(data), get_interval_weibull(data)]
         else:
             return [allowable, best_type_name]
