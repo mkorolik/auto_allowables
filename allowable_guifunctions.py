@@ -60,12 +60,12 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
         #     texts.append(f'{pair[0]}: {pair[1]}')
         Label(frame_text, text=all_sorts).grid()
 
-    # def save():
-    #     filename = filedialog.asksaveasfile(mode='w', filetypes=[('JPEG', '*.jpeg'), ('PNG', '*.png'), ('All Files', '*.*')])
-    #     img = Image(fig)
-    #     img.save(filename)
+    def save():
+        filename = filedialog.asksaveasfilename(filetypes=[('JPEG', '*.jpeg'), ('All Files', '*.*')])
+        # img = Image(fig)
+        fig.savefig(filename)
 
-    # Button(frame_text, text='Save All Images', command=save).grid()
+    Button(frame_text, text='Save All Images', command=save).grid()
             
 
 def plot_temp(frame_plot, *args):
