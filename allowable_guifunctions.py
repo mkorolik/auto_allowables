@@ -62,10 +62,9 @@ def display(frame_plots, frame_text, c=None, r=None, *args):
 
     def save():
         filename = filedialog.asksaveasfilename(filetypes=[('JPEG', '*.jpeg'), ('All Files', '*.*')])
-        # img = Image(fig)
         fig.savefig(filename)
 
-    Button(frame_text, text='Save All Images', command=save).grid()
+    Button(frame_text, text='Save Latest Distribution', command=save).grid()
             
 
 def plot_temp(frame_plot, *args):
@@ -77,9 +76,9 @@ def plot_temp(frame_plot, *args):
 
 
     try:
-        temp_fit, r2 = data_select.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
+        temp_fit, r2 = data_select.plot_temperature(q, temp.get(), rt.get(), ax=axs, deg=degree.get())
     except:
-        temp_fit, r2 = dataset.plot_temperature(q, temp.get(), ax=axs, deg=degree.get())
+        temp_fit, r2 = dataset.plot_temperature(q, temp.get(), rt.get(), ax=axs, deg=degree.get())
 
     canvas2 = FigureCanvasTkAgg(fig, master=frame_plot)
     canvas2.draw()
@@ -87,11 +86,11 @@ def plot_temp(frame_plot, *args):
     canvas2.get_tk_widget().grid()
 
     np.set_printoptions(precision=3)
-
     Label(frame_plot, text=f'Temperature fit (ax^n + bx^(n-1) + ...): {temp_fit}').grid()
-    Label(frame_plot, text=f'R2 = {r2[0]}').grid()
+    np.set_printoptions(precision=5)
+    Label(frame_plot, text=f'R2 = {r2}').grid()
     print(f'Temperature fit: {temp_fit}')
-    print(f'R2 = {r2[0]}')
+    print(f'R2 = {r2}')
 
 
 def get_files(frame_browse, frame_selections, frame_plots, frame_text):
@@ -130,26 +129,37 @@ def get_files(frame_browse, frame_selections, frame_plots, frame_text):
 # creates variable, tracer, and dropdown menu for quantity you want to analyze
     global chosen_quantity
     chosen_quantity = StringVar()
-    chosen_quantity.set("Choose Quantity")
-    # chosen_quantity.trace_add("write", lambda a, b, c: display(frame_plots, frame_text))
-    drop = OptionMenu(frame_browse, chosen_quantity, *dataset.headers).grid()
+    chosen_quantity.set("Property")
+    quantity_label = Label(frame_browse, text="Choose Property to Analyze: ")
+    quantity_label.grid()
+    drop = OptionMenu(frame_browse, chosen_quantity, *dataset.headers).grid(row=quantity_label.grid_info()['row'], column=quantity_label.grid_info()['column']+1)
 
 # temperature curve
     global degree
     degree = IntVar()
     degree.set("Degree")
-    drop_t = OptionMenu(frame_browse, degree, *[1, 2, 3, 4]).grid()
+    degree_label = Label(frame_browse, text='Temperature Fit Polynomial Order: ')
+    degree_label.grid()
+    drop_t = OptionMenu(frame_browse, degree, *[1, 2, 3, 4]).grid(row=degree_label.grid_info()['row'], column=degree_label.grid_info()['column']+1)
 
     global temp 
     temp = StringVar()
-    temp.set("Choose Temperature Column for Temperature Curve")
-    # temp.trace_add("write", lambda a, b, c: plot_temp(frame_plots))
-    # button_temp = Button(frame_browse, text="Plot Temperature Curve", command = lambda: plot_temp(frame_plots, frame_browse))
+    temp.set("Temperature Column")
+    temp.trace_add("write", lambda a, b, c: OptionMenu(frame_browse, rt, *list(set(dataset.df[temp.get()]))).grid(row=rt_label.grid_info()['row'], column=rt_label.grid_info()['column']+1))
+    temp_label = Label(frame_browse, text="Choose Temperature Data for Temperature Curve: ")
+    temp_label.grid()
     button_temp = OptionMenu(frame_browse, temp, *dataset.headers)
-    button_temp.grid()
+    button_temp.grid(row=temp_label.grid_info()['row'], column=temp_label.grid_info()['column']+1)
 
-    Button(frame_browse, text='Plot distributions', command= lambda: display(frame_plots, frame_text)).grid(row=button_temp.grid_info()['row']+3, column=button_temp.grid_info()['column'])
-    Button(frame_browse, text='Plot Temperature', command = lambda: plot_temp(frame_plots)).grid(row=button_temp.grid_info()['row']+4, column=button_temp.grid_info()['column'])
+    global rt 
+    rt = StringVar()
+    rt.set("RT")
+    rt_label = Label(frame_browse, text='Choose RT Value: ')
+    rt_label.grid()
+    # Button(frame_browse, text='debug rt', command= lambda: print(rt.get())).grid()
+
+    Button(frame_browse, text='Plot distributions', command= lambda: display(frame_plots, frame_text)).grid()
+    Button(frame_browse, text='Plot Temperature', command = lambda: plot_temp(frame_plots)).grid()
 
 
 # creates button for initiating a new sort

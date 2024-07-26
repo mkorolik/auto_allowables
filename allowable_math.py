@@ -213,8 +213,9 @@ class subset:
         ax.legend()
 
 
-    def plot_temperature(self, y, temp, ax=None, deg=1):
+    def plot_temperature(self, y, temp, room_temp, ax=None, deg=1):
         data = np.array(self.df[y])
+        data_rt = data/float(room_temp)
 
         if ax is None:
             ax = plt.gca()        
@@ -224,19 +225,20 @@ class subset:
         temperatures = list(set(temp_data))
         data_binned = []
         for t in temperatures:
-            data_binned.append(np.mean(data[np.argwhere(temp_data==t)]))
+            data_binned.append(np.mean(data_rt[np.argwhere(temp_data==t)]))
 
         params, residuals, rank, sv, rcond = np.polyfit(temperatures, data_binned, deg, full=True)
-        r2 = 1 - residuals/np.sum(np.abs(data - np.mean(data)))
+        r2 = 1 - residuals/np.sum(np.abs(data_rt - np.mean(data_rt)))
+        print(r2)
 
         x = np.linspace(min(temperatures)-1, max(temperatures)+1, 100)
 
-        ax.scatter(temp_data, data, color='lightblue', alpha=0.7)
+        ax.scatter(temp_data, data_rt, color='lightblue', alpha=0.7)
         ax.scatter(temperatures, data_binned)
         ax.plot(x, np.polyval(params, x))
 
         ax.set_xlabel(temp)
-        ax.set_ylabel(y)
+        ax.set_ylabel(f'{y} % of RT Value')
         
         return params, r2
         
