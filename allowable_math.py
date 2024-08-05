@@ -238,7 +238,7 @@ class subset:
         ax.plot(x, np.polyval(params, x))
 
         ax.set_xlabel(temp)
-        ax.set_ylabel(f'{y} % of RT Value')
+        ax.set_ylabel(f'{y} % of RT Mean')
         
         return params, r2
         
